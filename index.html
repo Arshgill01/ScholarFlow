@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScholarFlow - Connected Research Workspace</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">ScholarFlow</h1>
+            </div>
+
+            <!-- Search -->
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search notes & documents...">
+            </div>
+
+            <!-- Navigation Sections -->
+            <nav class="sidebar-nav">
+                <!-- Quick Actions -->
+                <div class="nav-section">
+                    <button class="new-note-btn" id="newNoteBtn">
+                        <span class="icon">+</span>
+                        New Note
+                    </button>
+                </div>
+
+                <!-- Documents Section -->
+                <div class="nav-section">
+                    <div class="section-header">
+                        <h3>Documents</h3>
+                        <button class="upload-btn-sm" id="uploadBtn">Upload</button>
+                    </div>
+                    <ul class="document-list" id="documentList">
+                        <li class="empty-item">
+                            <span class="empty-text">No documents</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Notes Section -->
+                <div class="nav-section">
+                    <div class="section-header">
+                        <h3>All Notes</h3>
+                        <span class="count" id="notesCount">0</span>
+                    </div>
+                    <ul class="notes-list" id="notesList">
+                        <li class="empty-item">
+                            <span class="empty-text">No notes yet</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Graph View -->
+                <div class="nav-section">
+                    <button class="nav-item" id="graphViewBtn">
+                        <span class="icon">🕸</span>
+                        Knowledge Graph
+                    </button>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sync-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Synced</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Empty State -->
+            <div class="empty-workspace" id="emptyWorkspace">
+                <div class="welcome-content">
+                    <h2>Welcome to ScholarFlow</h2>
+                    <p class="subtitle">Your connected research workspace</p>
+                    
+                    <div class="quick-actions">
+                        <button class="action-card" id="createFirstNote">
+                            <span class="action-icon">📝</span>
+                            <span class="action-text">Create your first note</span>
+                        </button>
+                        <button class="action-card" id="uploadFirstDoc">
+                            <span class="action-icon">📄</span>
+                            <span class="action-text">Upload a document</span>
+                        </button>
+                    </div>
+
+                    <div class="tips">
+                        <h4>Getting Started</h4>
+                        <ul>
+                            <li>Upload PDFs to build your knowledge base</li>
+                            <li>Create notes with <code>[[links]]</code> to connect ideas</li>
+                            <li>Ask questions in the AI assistant panel</li>
+                            <li>Explore connections in the Knowledge Graph</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Split Pane Workspace -->
+            <div class="workspace" id="workspace" hidden>
+                <!-- Left Pane: Note Editor -->
+                <div class="editor-pane" id="editorPane">
+                    <div class="editor-header">
+                        <div class="breadcrumbs">
+                            <span class="breadcrumb">Notes</span>
+                            <span class="separator">/</span>
+                            <span class="breadcrumb active" id="currentNoteTitle">Untitled</span>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="action-btn" id="togglePreview">Preview</button>
+                            <button class="action-btn" id="toggleChat">Ask AI</button>
+                        </div>
+                    </div>
+
+                    <div class="editor-container">
+                        <div class="editor-metadata">
+                            <input 
+                                type="text" 
+                                class="note-title-input" 
+                                id="noteTitleInput" 
+                                placeholder="Note title..."
+                                value="Untitled"
+                            >
+                            <div class="note-meta">
+                                <span class="date" id="noteDate">Created today</span>
+                                <div class="tags" id="noteTags">
+                                    <button class="add-tag-btn">+ Add tag</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-body">
+                            <textarea 
+                                class="note-editor" 
+                                id="noteEditor" 
+                                placeholder="Start typing... Use [[ to link to other notes"
+                            ></textarea>
+                        </div>
+
+                        <div class="editor-footer">
+                            <div class="editor-stats">
+                                <span id="wordCount">0 words</span>
+                                <span class="divider">|</span>
+                                <span id="charCount">0 characters</span>
+                                <span class="divider">|</span>
+                                <span id="backlinkCount">0 backlinks</span>
+                            </div>
+                            <div class="save-status" id="saveStatus">
+                                <span class="status-icon">✓</span>
+                                <span>Saved</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resizer -->
+                <div class="pane-resizer" id="paneResizer"></div>
+
+                <!-- Right Pane: AI Assistant -->
+                <div class="chat-pane" id="chatPane">
+                    <div class="chat-header">
+                        <h3>AI Assistant</h3>
+                        <div class="context-info">
+                            <span class="context-badge">Current note</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="welcome-message">
+                            <p>Ask me anything about your notes and documents.</p>
+                            <div class="suggested-questions">
+                                <button class="suggested-q">Summarize this note</button>
+                                <button class="suggested-q">Find related concepts</button>
+                                <button class="suggested-q">Explain the key points</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                class="chat-input" 
+                                id="chatInput"
+                                placeholder="Ask a question..."
+                            >
+                            <button class="send-btn" id="sendBtn">→</button>
+                        </div>
+                        <p class="input-hint">Answers include citations from your knowledge base</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Document Upload Modal -->
+        <div class="modal" id="uploadModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Upload Document</h3>
+                    <button class="close-btn" id="closeUploadModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <p class="upload-text">Drop your PDF here</p>
+                        <p class="upload-subtext">or click to browse</p>
+                        <input type="file" id="fileInput" accept=".pdf" hidden>
+                    </div>
+                    <div class="upload-progress" id="uploadProgress" hidden>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p class="progress-text">Processing document...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Knowledge Graph Modal -->
+        <div class="modal modal-large" id="graphModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Knowledge Graph</h3>
+                    <button class="close-btn" id="closeGraphModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="graph-container" id="graphContainer">
+                        <div class="graph-placeholder">
+                            <p>Your knowledge graph will appear here</p>
+                            <p class="hint">Create notes and add [[links]] to see connections</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
