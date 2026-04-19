@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from fastapi import UploadFile, HTTPException
@@ -33,7 +34,6 @@ class RagService:
         if not self.embeddings:
             raise HTTPException(status_code=500, detail="Google API Key is missing.")
 
-        import time
         os.makedirs("temp_uploads", exist_ok=True)
         unique_filename = f"{int(time.time())}_{file.filename}"
         file_path = f"temp_uploads/{unique_filename}"
@@ -59,10 +59,19 @@ class RagService:
             
             chunks = text_splitter.split_documents(pages)
 
+            # Extract contents to embed in batch
+            texts = [chunk.page_content for chunk in chunks]
+            
+            # Batch embed to save time and API quota limits
+            try:
+                embeddings_list = self.embeddings.embed_documents(texts)
+            except Exception as embed_err:
+                print(f"Embedding failed: {embed_err}")
+                raise embed_err
+
             for i, chunk in enumerate(chunks):
                 page_number = chunk.metadata.get('page', 0) + 1
-
-                embedding_vector = self.embeddings.embed_query(chunk.page_content)
+                embedding_vector = embeddings_list[i]
 
                 db_chunk = DocumentChunk(
                     document_id=db_document.id,
@@ -105,10 +114,16 @@ class RagService:
         # 3. Build context and sources
         context_parts = []
         sources = []
+        retrieved_chunks = []
         
         for chunk, filename in results:
             source_info = f"{filename}, Page {chunk.page_number}"
             context_parts.append(f"--- Source: {source_info} ---\n{chunk.text_content}\n")
+            
+            retrieved_chunks.append({
+                "text": chunk.text_content,
+                "source": source_info
+            })
             
             # Add to sources list uniquely
             if source_info not in sources:
@@ -118,13 +133,17 @@ class RagService:
 
         # 4. Generate answer using Gemini
         prompt_template = PromptTemplate.from_template(
-            "You are ScholarFlow, an intelligent research assistant.\n"
-            "Use the following pieces of retrieved context from the user's documents to answer the question.\n"
-            "When answering, explicitly cite the sources provided in the context (e.g., [Document Name, Page X]).\n"
-            "If the answer is not contained within the context, say 'I cannot answer this based on the provided documents.'\n\n"
-            "Context:\n{context}\n\n"
-            "Question: {question}\n\n"
-            "Answer:"
+            "You are an expert academic research synthesizer.\n"
+            "Analyze the following retrieved document chunks to answer the user's query.\n\n"
+            "STRICT RULES:\n"
+            "1. Do NOT use conversational filler (e.g., 'Here is the answer', 'Based on the documents').\n"
+            "2. Do NOT repeat the same information multiple times.\n"
+            "3. Use a highly structured format with headings: '### Synthesis', '### Key Data Points', and '### Sources'.\n"
+            "4. Every factual claim MUST end with an inline citation exactly matching the provided source string (e.g., [Doc.pdf, Page 4]).\n"
+            "5. If the context does not contain the answer, output exactly: 'Insufficient data in the current knowledge base to answer this query.'\n\n"
+            "CONTEXT CHUNKS:\n{context}\n\n"
+            "USER QUERY: {question}\n\n"
+            "STRUCTURED ANALYSIS:"
         )
 
         prompt = prompt_template.format(context=context_text, question=query)
@@ -135,4 +154,4 @@ class RagService:
         if isinstance(answer, list):
             answer = "\n".join([str(item) for item in answer])
             
-        return answer, sources
+        return answer, sources, retrieved_chunks
