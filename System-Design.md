@@ -8,16 +8,16 @@
 
 This document presents the technical proposal for **ScholarFlow**, an intelligent "Second Brain" for students and researchers. Unlike traditional note-taking apps that act as static storage, ScholarFlow utilizes **Retrieval-Augmented Generation (RAG)** to transform static PDF documents into an interactive knowledge base.
 
-The system allows users to upload lecture notes and research papers, which are then processed, embedded, and stored in a vector database. Users can query their knowledge base in natural language (e.g., _"Explain the difference between TCP and UDP based on my notes"_), receiving context-aware answers with citations. This project demonstrates advanced Full Stack engineering by integrating **Spring AI**, **Vector Search**, and **LLM orchestration** into a cohesive learning platform.
+The system allows users to upload lecture notes and research papers, which are then processed, embedded, and stored in a vector database. Users can query their knowledge base in natural language (e.g., _"Explain the difference between TCP and UDP based on my notes"_), receiving context-aware answers with citations. This project demonstrates advanced Full Stack engineering by integrating **LangChain**, **Vector Search**, and **LLM orchestration** into a cohesive learning platform.
 
 ---
 
 ## 2. Technology Stack
 
 - **Frontend:** React.js, Tailwind CSS, Framer Motion (for chat animations), Axios
-- **Backend:** Spring Boot 3.2, Spring AI
+- **Backend:** FastAPI, Python, SQLAlchemy, LangChain
 - **Database:** PostgreSQL (User Data), PGVector (Vector Embeddings)
-- **AI Engine:** OpenAI API (LLM), Jina/OpenAI (Embeddings)
+- **AI Engine:** Google Gemini (LLM and Embeddings)
 - **Storage:** Local File System / AWS S3 (Document Storage)
 - **Tools:** Docker (Containerization), Maven (Build Tool)
 
