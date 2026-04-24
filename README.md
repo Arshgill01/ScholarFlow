@@ -90,6 +90,18 @@ Your documents become a searchable, queryable brain.
 
 ---
 
+## Demo
+
+Query your PDFs and get cited answers:
+
+![Query Demo](docs/images/screenshot-query.png)
+
+![Response Demo](docs/images/screenshot-response.png)
+
+![Documents Demo](docs/images/screenshot-docs.png)
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
