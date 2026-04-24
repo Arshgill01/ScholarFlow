@@ -5,6 +5,8 @@ import axios from "axios";
 import { FileText, UploadCloud, Trash2, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { apiUrl } from "../lib/api";
+
 interface Document {
   id: number;
   filename: string;
@@ -18,7 +20,7 @@ export default function DocumentManager() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/documents/");
+      const res = await axios.get(apiUrl("/documents/"));
       setDocuments(res.data);
     } catch (err) {
       console.error(err);
@@ -27,7 +29,9 @@ export default function DocumentManager() {
   };
 
   useEffect(() => {
-    fetchDocuments();
+    queueMicrotask(() => {
+      void fetchDocuments();
+    });
   }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,13 +50,17 @@ export default function DocumentManager() {
     formData.append("file", file);
 
     try {
-      await axios.post("http://localhost:8000/documents/upload", formData, {
+      await axios.post(apiUrl("/documents/upload"), formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       fetchDocuments();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.response?.data?.detail || "Upload failed");
+      if (axios.isAxiosError(err) && typeof err.response?.data?.detail === "string") {
+        setError(err.response.data.detail);
+      } else {
+        setError("Upload failed");
+      }
     } finally {
       setUploading(false);
     }

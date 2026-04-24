@@ -16,6 +16,29 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Backend configuration
+
+The frontend should talk only to the Spring frontdoor.
+
+Create a local env file or use the checked-in example:
+
+```bash
+cp .env.example .env.local
+```
+
+Default local API target:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+```
+
+## Full stack local order
+
+1. `docker compose up -d`
+2. Start the Python backend on `8000`
+3. Start the Spring backend on `8080`
+4. Run `npm run dev` and open [http://localhost:3000](http://localhost:3000)
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
