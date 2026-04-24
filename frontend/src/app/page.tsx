@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import axios from "axios";
 import {
   UploadCloud,
@@ -193,7 +193,7 @@ export default function Dashboard() {
   };
 
   return (
-    <main className="flex h-screen w-full overflow-hidden bg-[#0C0C0C] text-[#A3A3A3] font-sans selection:bg-[#3B82F6] selection:text-white">
+    <main suppressHydrationWarning className="flex h-screen w-full overflow-hidden bg-[#0C0C0C] text-[#A3A3A3] font-sans selection:bg-[#3B82F6] selection:text-white">
       <section className="w-[300px] flex-shrink-0 border-r border-[#262626] bg-[#111111] flex flex-col z-20 shadow-2xl">
         <div className="p-5 border-b border-[#262626] bg-[#0A0A0A]">
           <div className="flex items-center gap-3">

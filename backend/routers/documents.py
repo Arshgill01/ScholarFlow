@@ -24,3 +24,11 @@ def list_documents(db: Session = Depends(get_db)):
     from models import Document
     docs = db.query(Document).all()
     return [{"id": d.id, "filename": d.filename, "upload_date": d.upload_date} for d in docs]
+
+@router.delete("/")
+def delete_all_documents(db: Session = Depends(get_db)):
+    from models import Document, DocumentChunk
+    db.query(DocumentChunk).delete()
+    db.query(Document).delete()
+    db.commit()
+    return {"message": "All documents deleted"}
