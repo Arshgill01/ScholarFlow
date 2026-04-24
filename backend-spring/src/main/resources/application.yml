@@ -1,0 +1,29 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: scholarflow-backend-spring
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+scholarflow:
+  migration:
+    mode: ${SCHOLARFLOW_MIGRATION_MODE:parallel-scaffold}
+    python-backend-url: ${PYTHON_BACKEND_URL:http://localhost:8000}
+    connect-timeout-ms: ${PYTHON_BACKEND_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${PYTHON_BACKEND_READ_TIMEOUT_MS:60000}
+  native-chat:
+    enabled: ${SCHOLARFLOW_NATIVE_CHAT_ENABLED:false}
+    fallback-to-python: ${SCHOLARFLOW_NATIVE_CHAT_FALLBACK_TO_PYTHON:true}
+    google-api-key: ${GOOGLE_API_KEY:}
+    google-chat-model: ${GOOGLE_CHAT_MODEL:models/gemini-2.5-flash}
+    google-embedding-model: ${GOOGLE_EMBEDDING_MODEL:models/gemini-embedding-001}
+    google-timeout-ms: ${GOOGLE_CHAT_TIMEOUT_MS:45000}
+    database-url: ${DATABASE_URL:}
+    database-username: ${DATABASE_USERNAME:}
+    database-password: ${DATABASE_PASSWORD:}
