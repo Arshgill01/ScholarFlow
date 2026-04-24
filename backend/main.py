@@ -1,35 +1,53 @@
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine, Base
-import models
+from database import get_engine
 from routers import documents, chat
 
-# Create database tables (For production, use Alembic migrations instead)
-models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title="ScholarFlow API",
-    description="RAG-powered research assistant backend",
-    version="0.1.0"
-)
+def should_initialize_database() -> bool:
+    return os.getenv("INIT_DB_ON_STARTUP", "false").lower() == "true"
 
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-app.include_router(documents.router)
-app.include_router(chat.router)
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    if should_initialize_database():
+        import models
 
-@app.get("/")
+        models.Base.metadata.create_all(bind=get_engine())
+    yield
 
-def read_root():
-    return {"message": "Welcome to ScholarFlow API"}
 
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="ScholarFlow API",
+        description="RAG-powered research assistant backend",
+        version="0.1.0",
+        lifespan=lifespan,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    app.include_router(documents.router)
+    app.include_router(chat.router)
+
+    @app.get("/")
+    def read_root():
+        return {"message": "Welcome to ScholarFlow API"}
+
+    @app.get("/health")
+    def health_check():
+        return {"status": "healthy"}
+
+    return app
+
+
+app = create_app()

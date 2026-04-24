@@ -1,6 +1,9 @@
 from sqlalchemy import text
-from database import engine
+
+from database import get_engine
 import models
+
+engine = get_engine()
 
 with engine.connect() as conn:
     conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
